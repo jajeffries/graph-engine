@@ -51,7 +51,8 @@ class Query(object):
 			callback(query)
 			results = query.execute()
 			new_results.update(set(results))
-		return list(new_results)
+
+		return list(filter(lambda node: node.name != self.from_node_name), new_results)
 
 	def _filter(self, rel):
 		return (rel[0] == self.relationship_type or rel[0] == Query.ALL_RELATIONSHIPS) and rel[1].type == self.to_type
@@ -149,7 +150,7 @@ class TestMe(TestCase):
 						.related_by("Acted In") \
 						.execute_sub_query(lambda query: query.related_by("Acted In", reverse=True)) \
 
-		self.assertEqual(in_things_with_john_cleese, [john_cleese, michael_palin])
+		self.assertEqual(in_things_with_john_cleese, [michael_palin])
 
 if __name__ == "__main__":
 	run_tests()
