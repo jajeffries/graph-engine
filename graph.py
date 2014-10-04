@@ -51,8 +51,7 @@ class Query(object):
 			callback(query)
 			results = query.execute()
 			new_results.update(set(results))
-
-		return list(filter(lambda node: node.name != self.from_node_name), new_results)
+		return list(filter(lambda node: node.name != self.from_node_name, new_results))
 
 	def _filter(self, rel):
 		return (rel[0] == self.relationship_type or rel[0] == Query.ALL_RELATIONSHIPS) and rel[1].type == self.to_type
