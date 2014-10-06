@@ -70,15 +70,31 @@ class Node(object):
 
 	ALL_TYPE = "*"
 
-	def __init__(self, name, type = None):
+	def __init__(self, name, type = None, callback = None):
 		self.name = name
 		self.from_relationships = []
 		self.to_relationships = []
 		self.type = type or Node.ALL_TYPE
+		self._callback = callback
+		self._changed()
 
 	def add_relationship(self, relationship, to_node):
 		self.from_relationships.append((relationship, to_node))
-		to_node.to_relationships.append((relationship, self))	
+		to_node.to_relationships.append((relationship, self))
+		self._changed()
+		to_node._changed()
+
+	def _changed(self):
+		if(self._callback is not None):
+			self._callback(self)
+
+class NodeFactory:
+
+	def __init__(self, callback):
+		self._callback = callback
+
+	def create(self, name, type=None):
+		return Node(name, type=type, callback=self._callback)
 
 class TestMe(TestCase):
 	
@@ -150,6 +166,14 @@ class TestMe(TestCase):
 						.execute_sub_query(lambda query: query.related_by("Acted In", reverse=True)) \
 
 		self.assertEqual(in_things_with_john_cleese, [michael_palin])
+
+	def test_can_get_node_changed_events(self):
+		self.created_node = None
+		def node_callback(new_node):
+			self.created_node = new_node
+		new_node = NodeFactory(node_callback).create("Dead Parrot")
+		self.assertEqual(self.created_node, new_node)
+
 
 if __name__ == "__main__":
 	run_tests()
