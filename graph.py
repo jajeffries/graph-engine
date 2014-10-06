@@ -175,17 +175,18 @@ class TestMe(TestCase):
 		self.assertEqual(self.created_node, new_node)
 
 	def test_can_get_node_changed_events_on_changed(self):
-		self.changed_node = []
+		self.changed_nodes = []
 		self.calls = 0
 		def node_callback(new_node):
 			self.calls += 1
 			self.changed_nodes.append(new_node)
 		dead_parrot = NodeFactory(node_callback).create("Dead Parrot")
-		Node("Michael Palin").add_relationship("Acted In", dead_parrot)
+		michael_palin = NodeFactory(node_callback).create("Michael Palin")
+		michael_palin.add_relationship("Acted In", dead_parrot)
 
-		self.assertEqual(self.calls, 2)
-		self.assertEqual(self.changed_node[0], dead_parrot)
-		self.assertEqual(self.changed_node[1], dead_parrot)
+		self.assertEqual(self.calls, 4)
+		self.assertTrue(dead_parrot in self.changed_nodes)
+		self.assertTrue(michael_palin in self.changed_nodes)
 
 
 if __name__ == "__main__":
